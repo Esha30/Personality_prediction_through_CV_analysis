@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result - AI Persona</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem 5%;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .side-panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .main-panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, white, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mbti-chip {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .trait-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .trait-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .trait-name {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .trait-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            position: relative;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .btn-back:hover {
+            color: white;
+        }
+
+        .description {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .tag {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="side-panel">
+            <h2 class="hero-title">Candidate Profile</h2>
+            <div class="mbti-chip">{{ mbti }}</div>
+            <p style="color: #94a3b8;">Primary Archetype Group</p>
+            
+            <div class="description">
+                <p><span class="tag">MBTI Impact:</span> Linguistic analysis of "{{ filename }}" indicates high alignment with the <b>{{ mbti }}</b> archetype. This suggests a pattern of <span id="mbtiDesc">...</span></p>
+            </div>
+
+            <a href="/" class="btn-back">← Analyze Another CV</a>
+        </div>
+
+        <div class="main-panel">
+            <h2 class="hero-title">Big Five (OCEAN) Report</h2>
+            
+            <div class="chart-container">
+                <canvas id="oceanChart"></canvas>
+            </div>
+
+            <div class="trait-grid">
+                {% for name, value in traits.items() %}
+                <div class="trait-card">
+                    <div class="trait-name">{{ name }}</div>
+                    <div class="trait-value">{{ value }}%</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('oceanChart').getContext('2d');
+        const traits = {{ traits | tojson }};
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: Object.keys(traits),
+                datasets: [{
+                    label: 'Trait Strength %',
+                    data: Object.values(traits),
+                    fill: true,
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: 'rgb(99, 102, 241)',
+                    pointBackgroundColor: 'rgb(99, 102, 241)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(99, 102, 241)'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255,255,255,0.1)' },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        pointLabels: { color: '#94a3b8', font: { size: 12 } },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Add dynamic MBTI description logic
+        const mbti = "{{ mbti }}";
+        const descEl = document.getElementById('mbtiDesc');
+        const descs = {
+            'I': 'focused, deep-thinking internal processing',
+            'E': 'socially engaged, proactive external communication',
+            'N': 'abstract conceptual thinking and innovation',
+            'S': 'practical, detail-oriented execution',
+            'T': 'logical, analytical decision making',
+            'F': 'value-driven, empathetic interpersonal skills',
+            'J': 'organized, planned and structured delivery',
+            'P': 'flexible, adaptive and spontaneous problem solving'
+        };
+        
+        let descText = "";
+        for(let char of mbti) {
+            if(descs[char]) descText += descs[char] + ", ";
+        }
+        descEl.textContent = descText.slice(0, -2);
+    </script>
+</body>
+</html>

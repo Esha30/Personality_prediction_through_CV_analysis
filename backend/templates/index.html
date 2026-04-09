@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Persona - Advanced CV Personality Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        .background-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary), transparent 70%);
+            top: -200px;
+            right: -200px;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: pulse 10s infinite alternate;
+        }
+
+        .background-blob-2 {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--secondary), transparent 70%);
+            bottom: -150px;
+            left: -150px;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        nav {
+            padding: 2rem 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, white, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+        }
+
+        p.subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            max-width: 600px;
+        }
+
+        .upload-container {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 600px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .upload-container:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .upload-area {
+            border: 2px dashed #475569;
+            padding: 3rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: rgba(99, 102, 241, 0.05);
+            border-color: var(--primary);
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-analyze {
+            margin-top: 2rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        progress {
+            width: 100%;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        footer {
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blob"></div>
+    <div class="background-blob-2"></div>
+
+    <nav>
+        <div class="logo">AI Persona</div>
+        <div style="color: #64748b;">v2.0 Advanced System</div>
+    </nav>
+
+    <main>
+        <h1>Unlock Candidate Potential Through <span style="color: var(--primary);">AI Analysis</span></h1>
+        <p class="subtitle">Upload professional CVs directly and leverage our Transformer models to predict personality traits accurately.</p>
+
+        <form action="/analyze" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-container">
+                <div class="upload-area" id="dropZone">
+                    <div class="icon">📄</div>
+                    <div id="fileInfo">Drag & Drop CV (PDF, DOCX)</div>
+                    <input type="file" name="cv" id="fileInput" accept=".pdf,.docx,.txt" required>
+                </div>
+                <button type="submit" class="btn-analyze">Start Analysis</button>
+            </div>
+        </form>
+    </main>
+
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 1.5rem; font-weight: 600;">Analyzing linguistic patterns...</p>
+        <p style="color: #94a3b8; font-size: 0.875rem;">Mapping results to Big Five OCEAN model</p>
+    </div>
+
+    <footer>
+        &copy; 2026 AI Persona Pro. Built with Transformers and advanced NLP.
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const form = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileInfo.textContent = e.target.files[0].name;
+                fileInfo.style.color = '#6366f1';
+                fileInfo.style.fontWeight = 'bold';
+            }
+        });
+
+        form.addEventListener('submit', () => {
+            loading.style.display = 'flex';
+        });
+    </script>
+</body>
+</html>
