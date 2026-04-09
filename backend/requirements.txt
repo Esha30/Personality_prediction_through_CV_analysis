@@ -1,0 +1,10 @@
+Flask==3.0.0
+flask-cors
+python-docx
+PyPDF2
+pandas
+numpy
+scikit-learn
+transformers
+vaderSentiment
+torch
